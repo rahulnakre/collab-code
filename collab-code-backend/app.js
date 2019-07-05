@@ -27,7 +27,8 @@ io.on("connection", socket => {
 	}, 2500);*/
 
 	socket.on("sent-from-client", data => {
-		socket.broadcast.emit('peer-message', { peer: "peer typed: " + JSON.stringify(data) });
+		console.log(data.textModel)
+		socket.broadcast.emit('peer-message', data);
 		//io.emit('peer-message', `peer: ${data}`);
 		console.log(data);
 	});

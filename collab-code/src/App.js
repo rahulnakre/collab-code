@@ -34,6 +34,10 @@ class App extends React.Component {
 		})
 		socket.on("peer-message", data => {
 			console.log(data)
+			// we got peer's recently typed text and its abs pos
+			// so let's place that change locally
+			// TODO: upgrade from naive abs pos way to crdt
+
 		})
 		socket.on("broadcast", data => {
 			console.log(data)
@@ -43,15 +47,23 @@ class App extends React.Component {
 
 	componentDidUpdate() { 
 		console.log(this.editorInstance)
+		//this.state.socket.emit("sent-from-client", { data: this.state.textModel})
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
 		this.setState({
 			textModel: value 
 		})
+		console.log(editor.getCursor())
+		this.state.socket.emit("sent-from-client", 
+			{ 
+				textModel: this.state.textModel,
+				absPos: editor.getCursor()
+			}
+		)
 		//console.log(editor)
 		//console.log(data)
-		console.log(value)
+		//console.log(value)
 		//this.state.socket.emit("sent-from-client", {data: this.state.textModel})
 	}
 
@@ -62,8 +74,8 @@ class App extends React.Component {
 	}
 
 	handleCursorActivity = (editor) => {
-		console.log(editor)
-		console.log("yess")
+		//console.log(editor)
+		//console.log("yess")
 	}
 
 	getEditor = editor => {
@@ -76,6 +88,7 @@ class App extends React.Component {
 			lineNumbers: true,
 			lineWrapping: true
 		}
+		
 		return (
 			<div className="App">
 				<h1>hello</h1>
