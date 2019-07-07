@@ -27,7 +27,7 @@ io.on("connection", socket => {
 	}, 2500);*/
 
 	socket.on("sent-from-client", data => {
-		console.log(data.textModel)
+		console.log(data.keyPressed)
 		socket.broadcast.emit('peer-message', data);
 		//io.emit('peer-message', `peer: ${data}`);
 		console.log(data);
