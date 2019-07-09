@@ -46,63 +46,64 @@ class App extends React.Component {
 			this.setState({
 				receivedFromPeer: true
 			})
+			if(data.origin === "+delete") {
+				this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
+				console.log("deleted")
+			} else if (data.origin === "cut") {
+				console.log("cutted")
+			} 
+			// his deals with typed input and paste
 			this.addPeerTextAtAbsPos(data.text, data.absPos.line, data.absPos.ch)
 
 		})
 		socket.on(SERVER_BROADCASTS, data => {
 			console.log(data)
 		});
-		//console.log(this.state.textModel)
 	}
 
 	componentDidUpdate() { 
-		console.log(this.editorInstance)
-		//this.state.socket.emit("sent-from-client", { data: this.state.textModel})
+		//console.log(this.editorInstance)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
+		console.log(data)
+		if (data.text === "") {
+			console.log(data.origin)
+		}
 		this.setState({
 			textModel: value 
 		})
-		//console.log(editor.getCursor())
-		console.log(this.state.receivedFromPeer)
+		// we only want to emit if this client typed or pasted something
 		if (!this.state.receivedFromPeer) {
-		this.state.socket.emit(SENT_FROM_CLIENT, 
-			{ 
-				text: data.text,
-				absPos: editor.getCursor()
-			}
-		)
+			this.state.socket.emit(SENT_FROM_CLIENT, 
+				{ 
+					text: data.text,
+					absPos: editor.getCursor(),
+					//from: data.from,
+					//to: data.to,
+					origin: data.origin
+				}
+			)
 		}
 		this.setState({
 			receivedFromPeer: false
 		})
-		//console.log(editor)
-		console.log(data)
-		//console.log(value)
-		//this.state.socket.emit("sent-from-client", {data: this.state.textModel})
+		//console.log(data)
 	}
 
-	/*handleKeyPress = (editor, event, f) => {
-		console.log(event)
-		this.state.socket.emit(SENT_FROM_CLIENT, 
-			{ 
-				keyPressed: event.key,
-				absPos: editor.getCursor()
-			}
-		)
-	}*/
+
+	deletePeerTextAtAbsPos = (line, ch) => { //could merge this with addPeerTextAtAbsPos
+		this.editorInstance.replaceRange("", {line: line, ch: ch}, {line: line, ch: ch+1})
+	}
 
 	addPeerTextAtAbsPos = (peerText, line, ch) => {
 		/* The text the peer sent will be added locally at the same absolute position
 		   as the peer.
 		*/
-		//console.log(this.editorInstance.getRange({line, ch}))
-		//console.log("here")
-		console.log(peerText)
-		console.log(line)
-		console.log(ch)
-		this.editorInstance.replaceRange(peerText, {line: line, ch: ch})
+		//console.log(peerText)
+		//console.log(line)
+		//console.log(ch)
+		this.editorInstance.replaceRange(peerText, {line: line, ch: ch-1})
 	}
 
 	getEditor = editor => {
