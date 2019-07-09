@@ -34,19 +34,19 @@ class App extends React.Component {
 		this.setState({
 			socket: socket
 		})
-		socket.on(SENT_FROM_SERVER, (data) => {
-			// for periodic pings
-			// console.log(data)
+		socket.on(SENT_FROM_SERVER, (data) => { // for periodic pings
 			var arr = data.split(" ")
 			console.log(arr[arr.length-1])
 		})
-		socket.on(PEER_MESSAGE, data => {
-			// when peer sends a message
+		socket.on(PEER_MESSAGE, data => { // when peer sends a message
 			console.log(data)
 			// we got peer's recently typed text and its abs pos
 			// so let's place that change locally
 			// TODO: upgrade from naive abs pos way to crdt
-			this.addPeerTextAtAbsPos(data.keyPressed, data.absPos.line, data.absPos.ch)
+			this.setState({
+				receivedFromPeer: true
+			})
+			this.addPeerTextAtAbsPos(data.text, data.absPos.line, data.absPos.ch)
 
 		})
 		socket.on(SERVER_BROADCASTS, data => {
@@ -65,38 +65,33 @@ class App extends React.Component {
 			textModel: value 
 		})
 		//console.log(editor.getCursor())
-		/*this.state.socket.emit(SENT_FROM_CLIENT, 
+		console.log(this.state.receivedFromPeer)
+		if (!this.state.receivedFromPeer) {
+		this.state.socket.emit(SENT_FROM_CLIENT, 
 			{ 
 				text: data.text,
 				absPos: editor.getCursor()
 			}
-		)*/
+		)
+		}
+		this.setState({
+			receivedFromPeer: false
+		})
 		//console.log(editor)
-		console.log(data.text)
+		console.log(data)
 		//console.log(value)
 		//this.state.socket.emit("sent-from-client", {data: this.state.textModel})
 	}
 
-	handleTextModelChange = (editor, data, value) => {
-		//console.log(editor)
-		//console.log(data)
-		//console.log(value)
-	}
-
-	handleCursorActivity = (editor) => {
-		//console.log(editor)
-		//console.log("yes")
-	}
-
-	handleKeyPress = (editor, event) => {
-		console.log(event.key)
+	/*handleKeyPress = (editor, event, f) => {
+		console.log(event)
 		this.state.socket.emit(SENT_FROM_CLIENT, 
 			{ 
 				keyPressed: event.key,
 				absPos: editor.getCursor()
 			}
 		)
-	}
+	}*/
 
 	addPeerTextAtAbsPos = (peerText, line, ch) => {
 		/* The text the peer sent will be added locally at the same absolute position
@@ -108,8 +103,6 @@ class App extends React.Component {
 		console.log(line)
 		console.log(ch)
 		this.editorInstance.replaceRange(peerText, {line: line, ch: ch})
-
-
 	}
 
 	getEditor = editor => {
@@ -132,8 +125,6 @@ class App extends React.Component {
 					onBeforeChange={this.handleBeforeTextModelChange}
 					onChange={this.handleTextModelChange}
 					editorDidMount={this.getEditor}
-					onCursorActivity={this.handleCursorActivity}
-					onKeyPress={this.handleKeyPress}
 				/>
 	    	</div>
 	  	);

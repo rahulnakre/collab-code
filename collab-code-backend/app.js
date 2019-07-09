@@ -13,22 +13,28 @@ const server = http.createServer(app);
 //http.Server listening for incoming events (.listen() used below)
 const io = socketIo(server);
 
+// useful vars 
 let interval;
 var i = 0;	
 var clients = 0;	
+const SENT_FROM_SERVER = "sent-from-server"
+const PEER_MESSAGE = "peer-message"
+const SERVER_BROADCASTS = "broadcast"
+const SENT_FROM_CLIENT = "sent-from-client"
+
 io.on("connection", socket => {
 	clients++;
 	console.log("new client connected");
-	io.sockets.emit('broadcast', { description: clients + ' clients connected!'});
+	io.sockets.emit(SERVER_BROADCASTS, { description: clients + ' clients connected!'});
 	//socket.emit("socketInfo", "");
 	/*interval = setInterval( () => {
 		socket.emit("sent-from-server", `emitting rn: ${i}`);
 		i++;
 	}, 2500);*/
 
-	socket.on("sent-from-client", data => {
-		console.log(data.keyPressed)
-		socket.broadcast.emit('peer-message', data);
+	socket.on(SENT_FROM_CLIENT, data => {
+		console.log(data.text)
+		socket.broadcast.emit(PEER_MESSAGE, data);
 		//io.emit('peer-message', `peer: ${data}`);
 		console.log(data);
 	});
@@ -36,7 +42,7 @@ io.on("connection", socket => {
 	socket.on("disconnect", () => {
 		clients--;
 		console.log("client disconnected");
-		io.sockets.emit("broadcast", { description: clients + " clients connected"})
+		io.sockets.emit(SERVER_BROADCASTS, { description: clients + " clients connected"})
 		clearInterval(interval);
 	});
 });
