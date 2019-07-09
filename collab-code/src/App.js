@@ -47,13 +47,15 @@ class App extends React.Component {
 				receivedFromPeer: true
 			})
 			if(data.origin === "+delete") {
-				this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
+				//this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
+				this.addPeerTextAtAbsPos("", data.from, data.to)
+
 				console.log("deleted")
 			} else if (data.origin === "cut") {
 				console.log("cutted")
 			} 
 			// his deals with typed input and paste
-			this.addPeerTextAtAbsPos(data.text, data.absPos.line, data.absPos.ch)
+			this.addPeerTextAtAbsPos(data.text, data.from, data.to)
 
 		})
 		socket.on(SERVER_BROADCASTS, data => {
@@ -79,8 +81,8 @@ class App extends React.Component {
 				{ 
 					text: data.text,
 					absPos: editor.getCursor(),
-					//from: data.from,
-					//to: data.to,
+					from: data.from,
+					to: data.to,
 					origin: data.origin
 				}
 			)
@@ -92,18 +94,24 @@ class App extends React.Component {
 	}
 
 
-	deletePeerTextAtAbsPos = (line, ch) => { //could merge this with addPeerTextAtAbsPos
+	/*deletePeerTextAtAbsPos = (line, ch) => { //could merge this with addPeerTextAtAbsPos
 		this.editorInstance.replaceRange("", {line: line, ch: ch}, {line: line, ch: ch+1})
-	}
+	}*/
 
-	addPeerTextAtAbsPos = (peerText, line, ch) => {
+	addPeerTextAtAbsPos = (peerText, from, to) => {
 		/* The text the peer sent will be added locally at the same absolute position
 		   as the peer.
 		*/
 		//console.log(peerText)
-		//console.log(line)
+		console.log(from)
 		//console.log(ch)
-		this.editorInstance.replaceRange(peerText, {line: line, ch: ch-1})
+		//this.editorInstance.replaceRange(peerText, {line: line, ch: ch-1})
+		const fromLine = from.line
+		const fromCh = from.ch
+		const toLine = to.line
+		const toCh = to.ch
+		this.editorInstance.replaceRange(peerText, {line: fromLine, ch: fromCh}, {line: toLine, ch: toCh})
+ 
 	}
 
 	getEditor = editor => {
