@@ -26,13 +26,20 @@ class App extends React.Component {
 		endpoint: "http://127.0.0.1:4001",
 		response: "",
 		socket: null,
-		receivedFromPeer: false
+		receivedFromPeer: false,
+		room: "abc123"
 	}
+
+
 
 	componentDidMount() {
 		const socket = socketIOClient(this.state.endpoint)
 		this.setState({
 			socket: socket
+		})
+
+		socket.on("connect", () => {
+			socket.emit("room", { room: this.state.room })
 		})
 		socket.on(SENT_FROM_SERVER, (data) => { // for periodic pings
 			// nothing to see here yet
@@ -44,12 +51,11 @@ class App extends React.Component {
 			this.setState({
 				receivedFromPeer: true
 			})
-			if(data.origin === "+delete") {
+			if(data.origin === "+delete" || data.origin === "+cut") {
 				//this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
 				this.mergeWithPeerTextAtAbsPos("", data.from, data.to)
-			} else if (data.origin === "cut") {
 			} else {
-				// his deals with typed input and paste
+				// this deals with typed input and paste
 				this.mergeWithPeerTextAtAbsPos(data.text, data.from, data.to)
 			}
 			
@@ -64,9 +70,7 @@ class App extends React.Component {
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
-		if (data.text === "") {
-			// console.log(data.origin)
-		}
+		
 		this.setState({
 			textModel: value 
 		})
