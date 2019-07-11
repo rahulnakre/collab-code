@@ -40,6 +40,7 @@ class App extends React.Component {
 		})
 		socket.on(PEER_MESSAGE, data => { // when peer sends a message
 			console.log(data)
+			console.log("received peer emit")
 			// we got peer's recently typed text and its abs pos
 			// so let's place that change locally
 			// TODO: upgrade from naive abs pos way to crdt
@@ -48,15 +49,16 @@ class App extends React.Component {
 			})
 			if(data.origin === "+delete") {
 				//this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
-				this.addPeerTextAtAbsPos("", data.from, data.to)
+				this.mergeWithPeerTextAtAbsPos("", data.from, data.to)
 
 				console.log("deleted")
 			} else if (data.origin === "cut") {
 				console.log("cutted")
-			} 
-			// his deals with typed input and paste
-			this.addPeerTextAtAbsPos(data.text, data.from, data.to)
-
+			} else {
+				// his deals with typed input and paste
+				this.mergeWithPeerTextAtAbsPos(data.text, data.from, data.to)
+			}
+			
 		})
 		socket.on(SERVER_BROADCASTS, data => {
 			console.log(data)
@@ -76,7 +78,9 @@ class App extends React.Component {
 			textModel: value 
 		})
 		// we only want to emit if this client typed or pasted something
+		console.log(this.state.receivedFromPeer)
 		if (!this.state.receivedFromPeer) {
+			console.log("gona emit to peer")
 			this.state.socket.emit(SENT_FROM_CLIENT, 
 				{ 
 					text: data.text,
@@ -98,12 +102,12 @@ class App extends React.Component {
 		this.editorInstance.replaceRange("", {line: line, ch: ch}, {line: line, ch: ch+1})
 	}*/
 
-	addPeerTextAtAbsPos = (peerText, from, to) => {
+	mergeWithPeerTextAtAbsPos = (peerText, from, to) => {
 		/* The text the peer sent will be added locally at the same absolute position
 		   as the peer.
 		*/
 		//console.log(peerText)
-		console.log(from)
+		//console.log(from)
 		//console.log(ch)
 		//this.editorInstance.replaceRange(peerText, {line: line, ch: ch-1})
 		const fromLine = from.line
