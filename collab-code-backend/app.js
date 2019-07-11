@@ -32,7 +32,7 @@ io.on("connection", socket => {
 	console.log("rand", rand);
 	if (rand % 2 === 0) {
 		socket.join("eve");	
-		console.log("new client connected to room 'even'");
+		console.log("new client connected to room 'eve'");
 	} else {
 		socket.join("odd");	
 		console.log("new client connected to room 'odd'");
@@ -51,10 +51,10 @@ io.on("connection", socket => {
 		for (room in socket.rooms) {
 			//console.log(room);
 			if (room.length === 3) {
-				console.log("yes")
+				socket.to(room).emit(PEER_MESSAGE, data);
 			}
 		}
-		socket.broadcast.emit(PEER_MESSAGE, data);
+		// socket.broadcast.emit(PEER_MESSAGE, data);
 		//io.emit('peer-message', `peer: ${data}`);
 		console.log(data);
 	});
