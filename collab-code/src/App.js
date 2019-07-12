@@ -12,6 +12,9 @@ const SENT_FROM_SERVER = "sent-from-server"
 const PEER_MESSAGE = "peer-message"
 const SERVER_BROADCASTS = "broadcast"
 const SENT_FROM_CLIENT = "sent-from-client"
+const UPDATE_ROOM_ID = "update-room-id"
+const SWITCH_ROOM = "switch-room"
+//const NEW_ROOM_INFO_FROM_SERVER = "new-room-info-from-server"
 
 
 class App extends React.Component {
@@ -27,7 +30,8 @@ class App extends React.Component {
 		response: "",
 		socket: null,
 		receivedFromPeer: false,
-		room: "abc123"
+		roomId: null,
+		roomToJoin: ""
 	}
 
 
@@ -41,8 +45,13 @@ class App extends React.Component {
 		socket.on("connect", () => {
 			socket.emit("room", { room: this.state.room })
 		})
-		socket.on(SENT_FROM_SERVER, (data) => { // for periodic pings
-			// nothing to see here yet
+		socket.on("updatechat", data => {
+			console.log(data)
+		})
+		socket.on(UPDATE_ROOM_ID, data => {
+			this.setState({
+				roomId: data.roomId
+			})
 		})
 		socket.on(PEER_MESSAGE, data => { // when peer sends a message
 			// we got peer's recently typed text and its abs pos
@@ -52,7 +61,6 @@ class App extends React.Component {
 				receivedFromPeer: true
 			})
 			if(data.origin === "+delete" || data.origin === "+cut") {
-				//this.deletePeerTextAtAbsPos(data.absPos.line, data.absPos.ch)
 				this.mergeWithPeerTextAtAbsPos("", data.from, data.to)
 			} else {
 				// this deals with typed input and paste
@@ -67,10 +75,10 @@ class App extends React.Component {
 
 	componentDidUpdate() { 
 		//console.log(this.editorInstance)
+		//console.log(this.state)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
-		
 		this.setState({
 			textModel: value 
 		})
@@ -108,6 +116,24 @@ class App extends React.Component {
 		this.editorInstance = editor
 	}
 	
+	handleFormSubmit = (event) => {
+		event.preventDefault()
+
+		console.log("submit")
+		this.state.socket.emit(SWITCH_ROOM, {
+			currentRoom: this.state.roomId,
+			nextRoom: this.state.roomToJoin
+		})
+	}
+
+	handleFormChange = (event) => {
+		const {name, value} = event.target
+		this.setState({
+			[name]: value
+		})
+
+	}
+
 	render() {
 		const codeMirrorConfig = {
 			theme: "material",
@@ -117,7 +143,7 @@ class App extends React.Component {
 		
 		return (
 			<div className="App">
-				<h1>hello</h1>
+				{this.state.roomId ? <h1>{this.state.roomId}</h1> : <h1>hello</h1>}
 				<CodeMirror 
 					value={this.state.textModel}
 					options={codeMirrorConfig}
@@ -125,6 +151,19 @@ class App extends React.Component {
 					onChange={this.handleTextModelChange}
 					editorDidMount={this.getEditor}
 				/>
+
+			<form onSubmit={this.handleFormSubmit}>
+				<label>
+					Enter room code to join:  
+					<input 
+						type="text" 
+						name="roomToJoin" 
+						value={this.state.roomToJoin}
+						onChange={this.handleFormChange}
+					/>
+				</label>
+				<button>Swap</button>
+			</form>
 	    	</div>
 	  	);
 	}

@@ -3,6 +3,8 @@ const app = express();
 const http = require("http");
 const socketIo = require("socket.io");
 const axios = require("axios");
+const rand = require("random-key");
+
 
 
 const port = process.env.PORT || 4001;
@@ -18,50 +20,53 @@ const io = socketIo(server);
 let interval;
 var i = 0;	
 var clients = 0;	
-const SENT_FROM_SERVER = "sent-from-server"
-const PEER_MESSAGE = "peer-message"
-const SERVER_BROADCASTS = "broadcast"
-const SENT_FROM_CLIENT = "sent-from-client"
-const MAKE_ROOM = "room"
+const SENT_FROM_SERVER = "sent-from-server";
+const PEER_MESSAGE = "peer-message";
+const SERVER_BROADCASTS = "broadcast";
+const SENT_FROM_CLIENT = "sent-from-client";
+const MAKE_ROOM = "room";
+const UPDATE_ROOM_ID = "update-room-id";
+const ROOM_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
+const SWITCH_ROOM = "switch-room";
+const NEW_ROOM_INFO = "new-room-info";
 
-var rand = 0
+var rando = 0
+
+// TODO: generate socket usernames
 
 io.on("connection", socket => {
 	clients++;
-	// console.log("new client connected");
-	console.log("rand", rand);
-	if (rand % 2 === 0) {
-		socket.join("eve");	
-		console.log("new client connected to room 'eve'");
-	} else {
-		socket.join("odd");	
-		console.log("new client connected to room 'odd'");
-	}
-	rand++;
+
+	var roomId = rand.generate(7);
+	socket.join(roomId);	
+	console.log("new client connected to room ", roomId);
+	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
+
 	io.sockets.emit(SERVER_BROADCASTS, { description: clients + ' clients connected!'});
-	//socket.emit("socketInfo", "");
-	/*interval = setInterval( () => {
-		socket.emit("sent-from-server", `emitting rn: ${i}`);
-		i++;
-	}, 2500);*/
 
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
 		console.log(data.text);
-		//console.log(socket.rooms)
 		for (room in socket.rooms) {
-			//console.log(room);
-			if (room.length === 3) {
+			if (room.length === ROOM_ID_LENGTH) {
 				socket.to(room).emit(PEER_MESSAGE, data);
 			}
 		}
-		// socket.broadcast.emit(PEER_MESSAGE, data);
-		//io.emit('peer-message', `peer: ${data}`);
 		console.log(data);
 	});
 
-	//socket.on(MAKE_ROOM, data => {
-		//socket.join("abc123")
-	//})
+	socket.on(SWITCH_ROOM, data => {
+		console.log(data)
+		socket.leave(data.currentRoom)
+		socket.join(data.nextRoom)
+		// tell the client what room was joined
+		socket.emit(ROOM_ID, { roomId: data.nextRoom});
+        // notify the room the client left and is joining TODO: use socket.username here
+        socket.broadcast.to(data.currentRoom).emit('updatechat','someone has left this room');
+        socket.broadcast.to(data.nextRoom).emit('updatechat','someone has joined this room');
+
+
+
+	})
 
 	socket.on("disconnect", () => {
 		clients--;
@@ -71,9 +76,5 @@ io.on("connection", socket => {
 	});
 });
 
-/*io.on("updatedTextModelState", socket => {
-	console.log("here i am");
-
-});*/
 
 server.listen(port, () => console.log(`listening on port ${port}`))
