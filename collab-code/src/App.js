@@ -8,7 +8,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 
-const SENT_FROM_SERVER = "sent-from-server"
+//const SENT_FROM_SERVER = "sent-from-server"
 const PEER_MESSAGE = "peer-message"
 const SERVER_BROADCASTS = "broadcast"
 const SENT_FROM_CLIENT = "sent-from-client"

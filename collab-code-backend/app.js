@@ -59,7 +59,7 @@ io.on("connection", socket => {
 		socket.leave(data.currentRoom)
 		socket.join(data.nextRoom)
 		// tell the client what room was joined
-		socket.emit(UPDATE_ROOM_ID, { roomId: data.nextRoom});
+		socket.emit(UPDATE_ROOM_ID, { roomId: data.nextRoom });
         // notify the room the client left and is joining TODO: use socket.username here
         socket.broadcast.to(data.currentRoom).emit('updatechat','someone has left this room');
         socket.broadcast.to(data.nextRoom).emit('updatechat','someone has joined this room');
