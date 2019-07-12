@@ -29,6 +29,7 @@ const UPDATE_ROOM_ID = "update-room-id";
 const ROOM_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
 const SWITCH_ROOM = "switch-room";
 const NEW_ROOM_INFO = "new-room-info";
+const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
 
 var rando = 0
 
@@ -36,7 +37,6 @@ var rando = 0
 
 io.on("connection", socket => {
 	clients++;
-
 	var roomId = rand.generate(7);
 	socket.join(roomId);	
 	console.log("new client connected to room ", roomId);
@@ -55,9 +55,11 @@ io.on("connection", socket => {
 	});
 
 	socket.on(SWITCH_ROOM, data => {
-		console.log(data)
-		socket.leave(data.currentRoom)
-		socket.join(data.nextRoom)
+		console.log(data);
+		var nextRoomClients = io.sockets.adapter.rooms[data.nextRoom].sockets;
+		copyRoomTextModel(nextRoomClients);
+		socket.leave(data.currentRoom);
+		socket.join(data.nextRoom);
 		// tell the client what room was joined
 		socket.emit(UPDATE_ROOM_ID, { roomId: data.nextRoom });
         // notify the room the client left and is joining TODO: use socket.username here
@@ -76,5 +78,20 @@ io.on("connection", socket => {
 	});
 });
 
+
+copyRoomTextModel = (nextRoomClients) => {
+	const randClient = getRandomClientInRoom(nextRoomClients);
+	console.log("random cleint", randClient);
+  	io.to(randClient).emit(GET_TEXTMODEL_FROM_CLIENT);
+
+}
+
+getRandomClientInRoom = (clients) => {
+	const keys = Object.keys(clients);
+	const randIndex = Math.floor(Math.random() * keys.length);
+	const randKey = keys[randIndex];
+	return randKey;
+
+}
 
 server.listen(port, () => console.log(`listening on port ${port}`))
