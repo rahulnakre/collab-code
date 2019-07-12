@@ -7,6 +7,9 @@ import 'codemirror/theme/material.css';
 import 'codemirror/mode/htmlmixed/htmlmixed';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
+import AppComponent from "./AppComponent"
+// handle functions
+//import handleFormSubmit from "./Functions/handleFunctions";
 
 //const SENT_FROM_SERVER = "sent-from-server"
 const PEER_MESSAGE = "peer-message"
@@ -141,31 +144,19 @@ class App extends React.Component {
 			lineWrapping: true
 		}
 		
-		return (
-			<div className="App">
-				{this.state.roomId ? <h1>{this.state.roomId}</h1> : <h1>hello</h1>}
-				<CodeMirror 
-					value={this.state.textModel}
-					options={codeMirrorConfig}
-					onBeforeChange={this.handleBeforeTextModelChange}
-					onChange={this.handleTextModelChange}
-					editorDidMount={this.getEditor}
-				/>
-
-			<form onSubmit={this.handleFormSubmit}>
-				<label>
-					Enter room code to join:  
-					<input 
-						type="text" 
-						name="roomToJoin" 
-						value={this.state.roomToJoin}
-						onChange={this.handleFormChange}
-					/>
-				</label>
-				<button>Swap</button>
-			</form>
-	    	</div>
-	  	);
+		return(
+			<AppComponent 
+				roomId={this.state.roomId}
+				codeMirrorConfig={codeMirrorConfig}
+				textModel={this.state.textModel}
+				handleBeforeTextModelChange={this.handleBeforeTextModelChange}
+				handleTextModelChange={this.handleTextModelChange}
+				getEditor={this.getEditor}
+				handleFormSubmit={this.handleFormSubmit}
+				roomToJoin={this.state.roomToJoin}
+				handleFormChange={this.handleFormChange}
+			/>
+		)
 	}
 }
 
