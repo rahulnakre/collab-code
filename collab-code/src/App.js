@@ -18,6 +18,8 @@ const SENT_FROM_CLIENT = "sent-from-client"
 const UPDATE_ROOM_ID = "update-room-id"
 const SWITCH_ROOM = "switch-room"
 const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
+const TRANSFER_TEXTMODEL = "transfer-textmodel";
+const UPDATE_TEXTMODEL = "update-textmodel";
 //const NEW_ROOM_INFO_FROM_SERVER = "new-room-info-from-server"
 
 
@@ -53,12 +55,23 @@ class App extends React.Component {
 			console.log(data)
 		})
 		socket.on(UPDATE_ROOM_ID, data => {
+			/* this is invoked when user first joins, and when they are swapping rooms
+			*/
 			this.setState({
 				roomId: data.roomId
 			})
 		})
 		socket.on(GET_TEXTMODEL_FROM_CLIENT, data => {
+			/* server is asking this randomly chosen client in the room to send over
+			its textmodel to the user that just joined the room
+			*/
 			console.log("gimmie text")
+			socket.emit(TRANSFER_TEXTMODEL, {textModel: this.state.textModel, newClient: data.newClient})
+		})
+		socket.on(UPDATE_TEXTMODEL, data => {
+			this.setState({
+				textModel: data.textModel
+			})
 		})
 		socket.on(PEER_MESSAGE, data => { // when peer sends a message
 			// we got peer's recently typed text and its abs pos

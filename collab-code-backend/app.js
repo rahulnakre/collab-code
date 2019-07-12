@@ -30,6 +30,9 @@ const ROOM_ID_LENGTH = 7; // used to get the right room (might wana try diff way
 const SWITCH_ROOM = "switch-room";
 const NEW_ROOM_INFO = "new-room-info";
 const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
+const TRANSFER_TEXTMODEL = "transfer-textmodel";
+const UPDATE_TEXTMODEL = "update-textmodel";
+
 
 var rando = 0
 
@@ -54,10 +57,19 @@ io.on("connection", socket => {
 		console.log(data);
 	});
 
+	socket.on(TRANSFER_TEXTMODEL, data => {
+		/* sending the textmodel of the room to the newly joined client
+		*/
+	  	io.to(`${data.newClient}`).emit(UPDATE_TEXTMODEL, {textModel: data.textModel});
+
+	});
+
 	socket.on(SWITCH_ROOM, data => {
 		console.log(data);
+		console.log("my socket: ", socket.id)
 		var nextRoomClients = io.sockets.adapter.rooms[data.nextRoom].sockets;
-		copyRoomTextModel(nextRoomClients);
+		console.log("next room clients:", nextRoomClients)
+		copyRoomTextModel(nextRoomClients, socket.id);
 		socket.leave(data.currentRoom);
 		socket.join(data.nextRoom);
 		// tell the client what room was joined
@@ -73,16 +85,17 @@ io.on("connection", socket => {
 	socket.on("disconnect", () => {
 		clients--;
 		console.log("client disconnected");
-		io.sockets.emit(SERVER_BROADCASTS, { description: clients + " clients connected"})
+		io.sockets.emit(SERVER_BROADCASTS, { description: clients + " clients connected"});
 		clearInterval(interval);
 	});
 });
 
 
-copyRoomTextModel = (nextRoomClients) => {
+copyRoomTextModel = (nextRoomClients, newClient) => {
 	const randClient = getRandomClientInRoom(nextRoomClients);
 	console.log("random cleint", randClient);
-  	io.to(randClient).emit(GET_TEXTMODEL_FROM_CLIENT);
+	// ask randClient for their textmodel
+  	io.to(`${randClient}`).emit(GET_TEXTMODEL_FROM_CLIENT, {newClient: newClient});
 
 }
 
