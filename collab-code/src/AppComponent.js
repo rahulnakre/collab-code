@@ -28,6 +28,7 @@ function AppComponent(props) {
 						onChange={props.handleFormChange}
 					/>
 				</label>
+				{props.invalidRoomMsg ? <h3>Invalid Room</h3> : null}
 				<button>Swap</button>
 			</form>
     	</div>

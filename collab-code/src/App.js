@@ -8,6 +8,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import AppComponent from "./AppComponent"
+import axios from "axios";
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -37,7 +38,8 @@ class App extends React.Component {
 		socket: null,
 		receivedFromPeer: false,
 		roomId: null,
-		roomToJoin: ""
+		roomToJoin: "",
+		invalidRoomMsg: false
 	}
 
 
@@ -96,6 +98,7 @@ class App extends React.Component {
 	componentDidUpdate() { 
 		//console.log(this.editorInstance)
 		//console.log(this.state)
+		//console.log(this.state.invalidRoomMsg)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
@@ -140,6 +143,33 @@ class App extends React.Component {
 		event.preventDefault()
 
 		console.log("submit")
+		if (this.state.roomToJoin === "") {
+			this.setState({
+				invalidRoomMsg: true
+			})
+			return
+		} else if (this.state.roomToJoin.length !== 7) {
+			this.setState({
+				invalidRoomMsg: true
+			})
+			return
+		}
+
+		axios.get(`http://localhost:4001/validate-new-room/${this.state.roomToJoin}`)
+		.then( res => {
+			console.log(res)
+			if (!res.data.isNewRoomValid) {
+				this.setState({
+					invalidRoomMsg: true
+				})
+				return
+			}
+		})
+
+		this.setState({
+			invalidRoomMsg: false
+		})
+
 		this.state.socket.emit(SWITCH_ROOM, {
 			currentRoom: this.state.roomId,
 			nextRoom: this.state.roomToJoin
@@ -172,6 +202,7 @@ class App extends React.Component {
 				handleFormSubmit={this.handleFormSubmit}
 				roomToJoin={this.state.roomToJoin}
 				handleFormChange={this.handleFormChange}
+				invalidRoomMsg={this.state.invalidRoomMsg}
 			/>
 		)
 	}

@@ -4,13 +4,32 @@ const http = require("http");
 const socketIo = require("socket.io");
 const axios = require("axios");
 const rand = require("random-key");
-
+const bodyParser = require('body-parser');
+const cors = require('cors')
 
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 
-app.use(index);
+
+//app.use(cors());
+
+app.use( (req, res, next) => {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
+	next();
+});
+
+//pre-flight requests
+app.options('*', function(req, res) {
+	res.sendStatus(200);
+});
+
+app.use(index); // dont think i need this
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 const server = http.createServer(app);
 //io is a Socket.IO server instance attached to an instance of 
 //http.Server listening for incoming events (.listen() used below)
@@ -19,7 +38,8 @@ const io = socketIo(server);
 // useful vars 
 let interval;
 var i = 0;	
-var clients = 0;	
+var clients = 0;
+var totalSocketIORooms = {};	
 const SENT_FROM_SERVER = "sent-from-server";
 const PEER_MESSAGE = "peer-message";
 const SERVER_BROADCASTS = "broadcast";
@@ -34,14 +54,28 @@ const TRANSFER_TEXTMODEL = "transfer-textmodel";
 const UPDATE_TEXTMODEL = "update-textmodel";
 
 
-var rando = 0
+
+app.get("/validate-new-room/:newroom", (req, res) => {
+	console.log(req.params);
+	res.status(200);
+	if (req.params.newroom in totalSocketIORooms) {
+		res.json({ isNewRoomValid: true});
+	} else {
+		res.json({ isNewRoomValid: false});
+	}
+	res.end();
+	console.log("validate");
+});
+
+
 
 // TODO: generate socket usernames
 
 io.on("connection", socket => {
 	clients++;
 	var roomId = rand.generate(7);
-	socket.join(roomId);	
+	socket.join(roomId);
+	totalSocketIORooms[roomId] = true;
 	console.log("new client connected to room ", roomId);
 	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
 
@@ -89,6 +123,8 @@ io.on("connection", socket => {
 		clearInterval(interval);
 	});
 });
+
+
 
 
 copyRoomTextModel = (nextRoomClients, newClient) => {
