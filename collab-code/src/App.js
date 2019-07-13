@@ -157,7 +157,6 @@ class App extends React.Component {
 
 		axios.get(`http://localhost:4001/validate-new-room/${this.state.roomToJoin}`)
 		.then( res => {
-			console.log(res)
 			if (!res.data.isNewRoomValid) {
 				this.setState({
 					invalidRoomMsg: true

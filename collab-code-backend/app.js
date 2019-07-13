@@ -56,7 +56,6 @@ const UPDATE_TEXTMODEL = "update-textmodel";
 
 
 app.get("/validate-new-room/:newroom", (req, res) => {
-	console.log(req.params);
 	res.status(200);
 	if (req.params.newroom in totalSocketIORooms) {
 		res.json({ isNewRoomValid: true});
@@ -64,7 +63,6 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 		res.json({ isNewRoomValid: false});
 	}
 	res.end();
-	console.log("validate");
 });
 
 
@@ -73,7 +71,7 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 
 io.on("connection", socket => {
 	clients++;
-	var roomId = rand.generate(7);
+	var roomId = generateUniqueRoomId();
 	socket.join(roomId);
 	totalSocketIORooms[roomId] = true;
 	console.log("new client connected to room ", roomId);
@@ -129,7 +127,6 @@ io.on("connection", socket => {
 
 copyRoomTextModel = (nextRoomClients, newClient) => {
 	const randClient = getRandomClientInRoom(nextRoomClients);
-	console.log("random cleint", randClient);
 	// ask randClient for their textmodel
   	io.to(`${randClient}`).emit(GET_TEXTMODEL_FROM_CLIENT, {newClient: newClient});
 
@@ -141,6 +138,14 @@ getRandomClientInRoom = (clients) => {
 	const randKey = keys[randIndex];
 	return randKey;
 
+}
+
+generateUniqueRoomId = () => {
+	var roomId = rand.generate(ROOM_ID_LENGTH);
+	while (roomId in totalSocketIORooms) {
+		roomId = rand.generate(ROOM_ID_LENGTH);
+	}
+	return roomId;
 }
 
 server.listen(port, () => console.log(`listening on port ${port}`))
