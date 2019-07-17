@@ -39,7 +39,10 @@ const io = socketIo(server);
 let interval;
 var i = 0;	
 var clients = 0;
-var totalSocketIORooms = {};	
+var totalSocketIORooms = {};
+
+var totalSiteIds = {};	
+
 const SENT_FROM_SERVER = "sent-from-server";
 const PEER_MESSAGE = "peer-message";
 const SERVER_BROADCASTS = "broadcast";
@@ -47,6 +50,7 @@ const SENT_FROM_CLIENT = "sent-from-client";
 const MAKE_ROOM = "room";
 const UPDATE_ROOM_ID = "update-room-id";
 const ROOM_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
+const SITE_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
 const SWITCH_ROOM = "switch-room";
 const NEW_ROOM_INFO = "new-room-info";
 const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
@@ -71,9 +75,11 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 
 io.on("connection", socket => {
 	clients++;
-	var roomId = generateUniqueRoomId();
+	
+	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
 	socket.join(roomId);
 	totalSocketIORooms[roomId] = true;
+	
 	console.log("new client connected to room ", roomId);
 	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
 
@@ -109,10 +115,11 @@ io.on("connection", socket => {
         // notify the room the client left and is joining TODO: use socket.username here
         socket.broadcast.to(data.currentRoom).emit('updatechat','someone has left this room');
         socket.broadcast.to(data.nextRoom).emit('updatechat','someone has joined this room');
-
-
-
 	})
+
+	socket.on("doom", data => {		
+		io.in(data.room).emit('big-announcement', "");
+	});
 
 	socket.on("disconnect", () => {
 		clients--;
@@ -140,12 +147,23 @@ getRandomClientInRoom = (clients) => {
 
 }
 
-generateUniqueRoomId = () => {
-	var roomId = rand.generate(ROOM_ID_LENGTH);
-	while (roomId in totalSocketIORooms) {
-		roomId = rand.generate(ROOM_ID_LENGTH);
+generateUniqueId = (type, length, pastIds) => {
+	/* 	type (str): can be either all numberical (for siteID)
+			 or can be alphabetical (for roomID)
+			options: 'room' or 'siteID'
+		length (int): length of the id to be generated
+		pastIDs (dict): dict in which past ids are stored, so 
+						that we don't duplicate ids
+
+
+	*/
+	
+	var id = type === "room" ? rand.generate(length) : rand.generateDigits(length)
+	while (id in pastIds) {
+		id = rand.generate(length);
 	}
-	return roomId;
+	return id;
 }
+
 
 server.listen(port, () => console.log(`listening on port ${port}`))

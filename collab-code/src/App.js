@@ -1,14 +1,9 @@
 import React from 'react';
 import './App.css';
 import socketIOClient from "socket.io-client";
-import { Controlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
-import 'codemirror/mode/htmlmixed/htmlmixed';
-import 'codemirror/mode/css/css';
-import 'codemirror/mode/javascript/javascript';
 import AppComponent from "./AppComponent"
 import axios from "axios";
+import { Controlled as CodeMirror } from 'react-codemirror2';
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -93,6 +88,20 @@ class App extends React.Component {
 		socket.on(SERVER_BROADCASTS, data => {
 			console.log(data)
 		});
+
+		socket.on("big-announcement", data => {
+			const max = 9;
+			const min = 0;
+			const arr = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+
+			const ind = Math.floor(Math.random() * (max - min + 1) + min);
+			/*const f = this.state.textModel + arr[ind]
+			this.setState({
+				textModel: f
+			})*/
+			//editor.replaceRange(arr[ind], CodeMirror.Pos(editor.lastLine())
+			console.log(this.editorInstance.lastLine())
+		})
 	}
 
 	componentDidUpdate() { 
@@ -102,9 +111,11 @@ class App extends React.Component {
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
+		console.log(value)
 		this.setState({
 			textModel: value 
 		})
+		console.log(!this.state.receivedFromPeer)
 		// we only want to emit if this client typed or pasted something
 		if (!this.state.receivedFromPeer) {
 			this.state.socket.emit(SENT_FROM_CLIENT, 
@@ -183,6 +194,10 @@ class App extends React.Component {
 
 	}
 
+	handleDoom = () => {
+		this.state.socket.emit("doom", {room: this.state.roomId})
+	}
+
 	render() {
 		const codeMirrorConfig = {
 			theme: "material",
@@ -191,18 +206,21 @@ class App extends React.Component {
 		}
 		
 		return(
-			<AppComponent 
-				roomId={this.state.roomId}
-				codeMirrorConfig={codeMirrorConfig}
-				textModel={this.state.textModel}
-				handleBeforeTextModelChange={this.handleBeforeTextModelChange}
-				handleTextModelChange={this.handleTextModelChange}
-				getEditor={this.getEditor}
-				handleFormSubmit={this.handleFormSubmit}
-				roomToJoin={this.state.roomToJoin}
-				handleFormChange={this.handleFormChange}
-				invalidRoomMsg={this.state.invalidRoomMsg}
-			/>
+			<div>
+				<AppComponent 
+					roomId={this.state.roomId}
+					codeMirrorConfig={codeMirrorConfig}
+					textModel={this.state.textModel}
+					handleBeforeTextModelChange={this.handleBeforeTextModelChange}
+					handleTextModelChange={this.handleTextModelChange}
+					getEditor={this.getEditor}
+					handleFormSubmit={this.handleFormSubmit}
+					roomToJoin={this.state.roomToJoin}
+					handleFormChange={this.handleFormChange}
+					invalidRoomMsg={this.state.invalidRoomMsg}
+				/>
+				<button onClick={this.handleDoom}>doom</button>
+			</div>
 		)
 	}
 }
