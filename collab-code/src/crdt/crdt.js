@@ -8,5 +8,5 @@ class CRDT {
 }
 
 class Identifier {
-
+	
 }

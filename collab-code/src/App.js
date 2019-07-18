@@ -4,6 +4,7 @@ import socketIOClient from "socket.io-client";
 import AppComponent from "./AppComponent"
 import axios from "axios";
 import { Controlled as CodeMirror } from 'react-codemirror2';
+import Editor from "./Editor"
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -23,7 +24,7 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.editorInstance = null
+		this.editorWrapper = null
 	}
 
 	state = {
@@ -78,10 +79,11 @@ class App extends React.Component {
 				receivedFromPeer: true
 			})
 			if(data.origin === "+delete" || data.origin === "+cut") {
-				this.mergeWithPeerTextAtAbsPos("", data.from, data.to)
+				this.editorWrapper.mergeWithPeerTextAtAbsPos("", data.from, data.to)
+
 			} else {
 				// this deals with typed input and paste
-				this.mergeWithPeerTextAtAbsPos(data.text, data.from, data.to)
+				this.editorWrapper.mergeWithPeerTextAtAbsPos(data.text, data.from, data.to)
 			}
 			
 		})
@@ -100,14 +102,14 @@ class App extends React.Component {
 				textModel: f
 			})*/
 			//editor.replaceRange(arr[ind], CodeMirror.Pos(editor.lastLine())
-			console.log(this.editorInstance.lastLine())
+			console.log(this.editorWrapper.codemirrorInstance.lastLine())
 		})
 	}
 
 	componentDidUpdate() { 
-		//console.log(this.editorInstance)
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
+		console.log(this.editorWrapper)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
@@ -134,20 +136,20 @@ class App extends React.Component {
 	}
 
 
-	mergeWithPeerTextAtAbsPos = (peerText, from, to) => {
-		/* The text the peer sent will be added locally at the same absolute position
-		   as the peer.
-		*/
+/*	mergeWithPeerTextAtAbsPos = (peerText, from, to) => {
+		// The text the peer sent will be added locally at the same absolute position
+		// as the peer.
+		//
 		const fromLine = from.line
 		const fromCh = from.ch
 		const toLine = to.line
 		const toCh = to.ch
-		this.editorInstance.replaceRange(peerText, {line: fromLine, ch: fromCh}, {line: toLine, ch: toCh})
- 
-	}
+		this.editorWrapper.codemirrorInstance.replaceRange(peerText, {line: fromLine, ch: fromCh}, {line: toLine, ch: toCh})
+	}*/
 
 	getEditor = editor => {
-		this.editorInstance = editor
+		this.editorWrapper = new Editor(editor)
+
 	}
 	
 	handleFormSubmit = (event) => {
