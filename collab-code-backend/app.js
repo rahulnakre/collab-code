@@ -44,6 +44,7 @@ var clients = 0;
 var totalSocketIORooms = {};
 // useful for removing unused room, so Ids can be reused
 var roomsToUsers = {}
+// note: siteIds are sockets
 var totalSiteIds = {};	
 
 const SENT_FROM_SERVER = "sent-from-server";
@@ -81,9 +82,9 @@ io.on("connection", socket => {
 	
 
 	// give new client a unique siteID
-	var siteID = generateUniqueId("siteID", SITE_ID_LENGTH, totalSiteIds)
-	totalSiteIds[siteID] = true
-	console.log(totalSiteIds)
+	// var siteID = generateUniqueId("siteID", SITE_ID_LENGTH, totalSiteIds)
+	// totalSiteIds[siteID] = true
+	// console.log(totalSiteIds)
 
 	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
 	socket.join(roomId);
@@ -100,6 +101,7 @@ io.on("connection", socket => {
 	// when cleint types, send message to other clients thru here (server)
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
 		console.log(data.text);
+		//totalSocketIORooms[]
 		for (room in socket.rooms) {
 			if (room.length === ROOM_ID_LENGTH) {
 				socket.to(room).emit(PEER_MESSAGE, data);
