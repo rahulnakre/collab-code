@@ -76,6 +76,11 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 io.on("connection", socket => {
 	clients++;
 	
+	// give new client a unique siteID
+	var siteID = generateUniqueId("siteID", SITE_ID_LENGTH, totalSiteIds)
+	totalSiteIds[siteID] = true
+	console.log(totalSiteIds)
+
 	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
 	socket.join(roomId);
 	totalSocketIORooms[roomId] = true;
