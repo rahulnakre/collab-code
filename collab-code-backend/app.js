@@ -42,7 +42,8 @@ let interval;
 var i = 0;	
 var clients = 0;
 var totalSocketIORooms = {};
-
+// useful for removing unused room, so Ids can be reused
+var roomsToUsers = {}
 var totalSiteIds = {};	
 
 const SENT_FROM_SERVER = "sent-from-server";
@@ -135,6 +136,7 @@ io.on("connection", socket => {
 	});
 
 	socket.on("disconnect", () => {
+		console.log(socket.id)
 		clients--;
 		console.log("client disconnected");
 		io.sockets.emit(SERVER_BROADCASTS, { description: clients + " clients connected"});
