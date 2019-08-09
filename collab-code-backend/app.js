@@ -84,7 +84,6 @@ io.on("connection", socket => {
 	totalSiteIds[siteID] = true
 	console.log(totalSiteIds)
 
->>>>>>> master
 	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
 	socket.join(roomId);
 	totalSocketIORooms[roomId] = true;
