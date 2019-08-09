@@ -102,7 +102,9 @@ class App extends React.Component {
 				textModel: f
 			})*/
 			//editor.replaceRange(arr[ind], CodeMirror.Pos(editor.lastLine())
-			console.log(this.editorWrapper.codemirrorInstance.lastLine())
+			this.editorWrapper.codemirrorInstance.replaceRange(arr[ind], {line: 0, ch: 0})
+
+			console.log(this.editorWrapper.codemirrorInstance.getValue())
 		})
 	}
 
@@ -113,11 +115,11 @@ class App extends React.Component {
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
+		console.log("before change")
 		console.log(value)
 		this.setState({
 			textModel: value 
 		})
-		console.log(!this.state.receivedFromPeer)
 		// we only want to emit if this client typed or pasted something
 		if (!this.state.receivedFromPeer) {
 			this.state.socket.emit(SENT_FROM_CLIENT, 

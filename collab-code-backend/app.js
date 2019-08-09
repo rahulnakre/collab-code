@@ -7,6 +7,8 @@ const rand = require("random-key");
 const bodyParser = require('body-parser');
 const cors = require('cors')
 
+// CRDT
+const CRDT = require("./crdt/CRDT");
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
@@ -76,15 +78,20 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 io.on("connection", socket => {
 	clients++;
 	
+	// put new connection into a new room
 	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
 	socket.join(roomId);
 	totalSocketIORooms[roomId] = true;
-	
 	console.log("new client connected to room ", roomId);
 	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
+	
+	// every room should have it's own crdt, so here's that
+	totalSocketIORooms[roomId] = new CRDT();
 
+	// update number of connected clients
 	io.sockets.emit(SERVER_BROADCASTS, { description: clients + ' clients connected!'});
 
+	// when cleint types, send message to other clients thru here (server)
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
 		console.log(data.text);
 		for (room in socket.rooms) {
@@ -95,6 +102,7 @@ io.on("connection", socket => {
 		console.log(data);
 	});
 
+	// when a new client joins, we want to send current textmodel of room to it
 	socket.on(TRANSFER_TEXTMODEL, data => {
 		/* sending the textmodel of the room to the newly joined client
 		*/
@@ -128,8 +136,6 @@ io.on("connection", socket => {
 		clearInterval(interval);
 	});
 });
-
-
 
 
 copyRoomTextModel = (nextRoomClients, newClient) => {
