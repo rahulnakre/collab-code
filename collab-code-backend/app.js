@@ -53,6 +53,7 @@ const SERVER_BROADCASTS = "broadcast";
 const SENT_FROM_CLIENT = "sent-from-client";
 const MAKE_ROOM = "room";
 const UPDATE_ROOM_ID = "update-room-id";
+const UPDATE_SITE_ID = "update-site-id";
 const ROOM_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
 const SITE_ID_LENGTH = 7; // used to get the right room (might wana try diff way)
 const SWITCH_ROOM = "switch-room";
@@ -80,17 +81,20 @@ app.get("/validate-new-room/:newroom", (req, res) => {
 io.on("connection", socket => {
 	clients++;
 	
-
 	// give new client a unique siteID
 	// var siteID = generateUniqueId("siteID", SITE_ID_LENGTH, totalSiteIds)
 	// totalSiteIds[siteID] = true
 	// console.log(totalSiteIds)
 
+
 	var roomId = generateUniqueId("room", ROOM_ID_LENGTH, totalSocketIORooms);
+	totalSiteIds[socket.id] = {room: roomId}
+
 	socket.join(roomId);
-	totalSocketIORooms[roomId] = true;
+	totalSocketIORooms[roomId] = {};
 	console.log("new client connected to room ", roomId);
 	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
+	socket.emit(UPDATE_SITE_ID, {siteId: socket.id});
 	
 	// every room should have it's own crdt, so here's that
 	totalSocketIORooms[roomId] = new CRDT();
@@ -102,6 +106,9 @@ io.on("connection", socket => {
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
 		console.log(data.text);
 		//totalSocketIORooms[]
+		// HERE CRDT: here is probably where i want to add to crdt, be
+		totalSocketIORooms[data.roomId].localInsert();
+
 		for (room in socket.rooms) {
 			if (room.length === ROOM_ID_LENGTH) {
 				socket.to(room).emit(PEER_MESSAGE, data);

@@ -11,6 +11,7 @@ class CRDT {
 		/* char is a Char object
 		   ind is a numerical index
 		*/
+		console.log("local insert...")
 		insertToCharArray()
 		insertToText()
 	}

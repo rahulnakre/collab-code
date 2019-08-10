@@ -13,6 +13,7 @@ const PEER_MESSAGE = "peer-message"
 const SERVER_BROADCASTS = "broadcast"
 const SENT_FROM_CLIENT = "sent-from-client"
 const UPDATE_ROOM_ID = "update-room-id"
+const UPDATE_SITE_ID = "update-site-id"
 const SWITCH_ROOM = "switch-room"
 const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
 const TRANSFER_TEXTMODEL = "transfer-textmodel";
@@ -34,6 +35,7 @@ class App extends React.Component {
 		socket: null,
 		receivedFromPeer: false,
 		roomId: null,
+		siteID: null,
 		roomToJoin: "",
 		invalidRoomMsg: false
 	}
@@ -57,6 +59,11 @@ class App extends React.Component {
 			*/
 			this.setState({
 				roomId: data.roomId
+			})
+		})
+		socket.on(UPDATE_SITE_ID, data => {
+			this.setState({
+				siteId: data.siteId
 			})
 		})
 		socket.on(GET_TEXTMODEL_FROM_CLIENT, data => {
@@ -112,7 +119,7 @@ class App extends React.Component {
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
 		console.log(this.editorWrapper)
-		console.log(this.state.socket.id)
+		//console.log(this.state.socket.id)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
@@ -129,7 +136,9 @@ class App extends React.Component {
 					absPos: editor.getCursor(),
 					from: data.from,
 					to: data.to,
-					origin: data.origin
+					origin: data.origin,
+					roomId: this.state.roomId,
+					siteId: this.state.socket.id
 				}
 			)
 		}
