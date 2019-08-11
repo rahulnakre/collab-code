@@ -145,6 +145,7 @@ io.on("connection", socket => {
 	});
 
 	socket.on("disconnect", () => {
+
 		console.log(socket.id)
 		clients--;
 		console.log("client disconnected");

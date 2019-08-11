@@ -15,9 +15,9 @@ class CRDT {
 		*/
 		this.siteID = siteID
 		this.charArray = []
+		this.currLine = -1
 		//this.text = ""
 	}
-
 
 
 	localInsert(val, siteId, type, from, to) {
@@ -25,24 +25,38 @@ class CRDT {
 		   ind is a numerical index
 		*/
 		// Todo: DO I USE FROM OR TO??
-		
+		//console.log(from)
 		var char = new Char(val, siteId, from)
 		console.log("local insert...")
-		console.log
-		this.insertToCharArray(char)
+		this.insertToCharArray(char, from)
 		//this.insertToText()
 	}
 
-	insertToCharArray(char) {
-		this.charArray.push(char)
+	insertToCharArray(char, pos) {
+		if(this.currLine !== pos.line) {
+			console.log("new line")
+			this.charArray.push([])
+			this.currLine = pos.line 
+		}
+
+		this.findPreviousPos(pos)
+		this.findNextPos(pos)
+
+		this.charArray[pos.line].push(char)
 		console.log(this.charArray)
 	}
 
 	findPreviousPos(currentPos) {
-		
+		//var prev = this.charArray[]
+		console.log("finding prev pos of...\n" + JSON.stringify(currentPos))
+		console.log()
+
+
 	}
 
-	findNextPos(currentPos)
+	findNextPos(currentPos) {
+		console.log("finding next pos...\n" + JSON.stringify(currentPos))
+	}
 
 	insertToText() {
 		//
