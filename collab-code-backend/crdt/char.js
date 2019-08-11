@@ -5,3 +5,5 @@ class Char {
 		this.position = position 
 	}
 }
+
+module.exports = Char;

@@ -95,7 +95,7 @@ io.on("connection", socket => {
 	console.log("new client connected to room ", roomId);
 	socket.emit(UPDATE_ROOM_ID, { roomId: roomId});
 	socket.emit(UPDATE_SITE_ID, {siteId: socket.id});
-	
+
 	// every room should have it's own crdt, so here's that
 	totalSocketIORooms[roomId] = new CRDT();
 
@@ -105,16 +105,16 @@ io.on("connection", socket => {
 	// when cleint types, send message to other clients thru here (server)
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
 		console.log(data.text);
-		//totalSocketIORooms[]
+
 		// HERE CRDT: here is probably where i want to add to crdt, be
-		totalSocketIORooms[data.roomId].localInsert();
+		totalSocketIORooms[data.roomId].localInsert(data.text, data.siteId, data.origin, data.from, data.to);
 
 		for (room in socket.rooms) {
 			if (room.length === ROOM_ID_LENGTH) {
 				socket.to(room).emit(PEER_MESSAGE, data);
 			}
 		}
-		console.log(data);
+		//console.log(data);
 	});
 
 	// when a new client joins, we want to send current textmodel of room to it
