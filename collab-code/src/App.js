@@ -124,7 +124,7 @@ class App extends React.Component {
 
 	handleBeforeTextModelChange = (editor, data, value) => {
 		console.log("before change")
-		console.log(value)
+		console.log(data.text)
 		this.setState({
 			textModel: value 
 		})

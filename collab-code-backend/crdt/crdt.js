@@ -35,12 +35,20 @@ class CRDT {
 		*/
 		// Todo: DO I USE FROM OR TO?? or neither nvm
 		//console.log(from)
-		var char = new Char(val, siteId, from)
+		var char = new Char(val[0], siteId, from)
+		var checkIfNewLine = false
+
 		console.log("local insert...")
 		console.log("val: ", val)
-		if (type === "+input" && val !== ['', '']) {
+		if (val.length == 2 && val[0] == "" && val[1] == "") { 
+			checkIfNewLine = true
+			char = new Char("\n", siteId, from)
+
+		}
+		if (type === "+input") {
 			this.insertToCharArray(char, from)
 		}
+		console.log(this.charArray)
 		//this.insertToText()
 	}
 
@@ -55,7 +63,7 @@ class CRDT {
 		this.findNextPos(pos)
 
 		this.charArray[pos.line].push(char)
-		console.log(this.charArray[pos.line])
+		//console.log(this.charArray[pos.line])
 	}
 
 	findPreviousPos(currentPos) {
@@ -76,13 +84,13 @@ class CRDT {
 	}
 
 	findNextPos(currentPos) {
-		console.log("finding next pos...\n" + JSON.stringify(currentPos))
+		//console.log("finding next pos...\n" + JSON.stringify(currentPos))
 		const numLines = this.charArray.length
 		const numCharsOnLine = (this.charArray[currentPos.line] && this.charArray[currentPos.line].length) + 1 || 0
-		console.log("num lines: ", numLines)
-		console.log("chars on line ", numCharsOnLine)
+		//console.log("num lines: ", numLines)
+		//console.log("chars on line ", numCharsOnLine)
 		if (currentPos.line === numLines - 1) {
-
+			console.log("last")
 		}
 	}
 
