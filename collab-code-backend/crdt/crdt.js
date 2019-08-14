@@ -36,14 +36,12 @@ class CRDT {
 		// Todo: DO I USE FROM OR TO?? or neither nvm
 		//console.log(from)
 		var char = new Char(val[0], siteId, from)
-		this.checkIfCurrCharIsAfterNewline(from.line, from.ch)
 
 		console.log("local insert...")
 		console.log("val: ", val)
 		if (val.length == 2 && val[0] == "" && val[1] == "") { 
 			char = new Char("\n", siteId, from)
 			// only time we have to possibly remove a newline is when we're adding one
-			this.removeNewLine(from.line)
 		}
 
 		if (type === "+input") {
@@ -67,7 +65,7 @@ class CRDT {
 
 
 		//this.charArray[pos.line].push(char)
-		this.charArray[pos.line].splice(pos.ch ,0, char)
+		this.charArray[pos.line].splice(pos.ch, 0, char)
 		//console.log(this.charArray[pos.line])
 	}
 
@@ -104,20 +102,7 @@ class CRDT {
 
 	insertToText() {
 		//
-	}
-
-	checkIfCurrCharIsAfterNewline(line, ch) {
-
-	}
-
-	removeNewLine(line) {
-		/* checks if newline exists in a given line, and if it does,
-			it is removed	
-		*/
-		// console.log("check this line to remove newline: ", line)
-
-	}
-	
+	}	
 	
 }
 
