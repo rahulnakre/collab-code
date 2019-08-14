@@ -92,11 +92,12 @@ class CRDT {
 		const numCharsOnLine = (this.charArray[currentPos.line] && this.charArray[currentPos.line].length) + 1 || 0
 		//console.log("num lines: ", numLines)
 		console.log("chars on line ", numCharsOnLine)
-		if (currentPos.line === numLines - 1) { // last line
+		// last line, shoould it be last char?
+		if (currentPos.line === numLines - 1 && currentPos.ch === numCharsOnLine - 1) { 
 			console.log("last")
 			return []
-		} else {
-
+		} else { // if n
+			return this.charArray[currentPos.line][currentPos.ch]
 		}
 	}
 
