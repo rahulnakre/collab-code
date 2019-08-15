@@ -7,4 +7,5 @@ class Char {
 	}
 }
 
-module.exports = Char;
+exports.Char = Char
+//module.exports = Char;

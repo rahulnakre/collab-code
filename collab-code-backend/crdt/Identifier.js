@@ -4,3 +4,5 @@ class Identifier {
 		this.siteId = siteId
 	}
 }
+
+exports.Identifier = Identifier

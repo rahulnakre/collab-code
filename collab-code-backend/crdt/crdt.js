@@ -1,7 +1,9 @@
 //import Char from "./char"
-
+const Identifier = require("./Identifier").Identifier
+const Char = require("./Char").Char
+//import Identifier from ".Identifier"
 // temp - until i fix the unexpected identifier bug
-class Char {
+/*class Char {
 	constructor(value, siteID, position, digit=null) {
 		this.value = value
 		this.siteID = siteID
@@ -9,22 +11,29 @@ class Char {
 		this.digit = digit
 	}
 
-	/*compare(char1, char2) {
+	compare(char1, char2) {
 		if char1.psoiti
-	}*/
+	}
 
 	createIdentifier(digit, siteID) {
 		const obj = { digit, siteID }
 	}
-}
+}*/
 
 class CRDT {
 	constructor(siteID) {
 		/* args: siteID is a unique identifier for each site
 		*/
+		this.base = 32
 		this.siteID = siteID
 		this.charArray = []
 		this.currLine = -1
+		this.levelStrategy = []
+		this.strategy = "plus"
+		this.boundary = 5
+		// the 2 special chars that start and end the document
+		this.firstCharId = new Identifier(0, siteID)
+		this.lastCharId = new Identifier()
 		//this.text = ""
 	}
 
@@ -35,7 +44,7 @@ class CRDT {
 		*/
 		// Todo: DO I USE FROM OR TO?? or neither nvm
 		//console.log(from)
-		var char = new Char(val[0], siteId, from)
+		var char = new Char(val[0], siteId, from, null)
 
 		console.log("local insert...")
 		console.log("val: ", val)
@@ -59,12 +68,13 @@ class CRDT {
 		}
 
 		var prevPos = this.findPreviousPos(pos)
-		// console.log("prev pos... " + JSON.stringify(prevPos))
+		console.log("prev pos... " + JSON.stringify(prevPos))
 		var nextPos = this.findNextPos(pos)
 		console.log("next pos... " + JSON.stringify(nextPos))
 
-
+		var betweenPos = this.generatePosBetween(prevPos, nextPos)
 		//this.charArray[pos.line].push(char)
+		
 		this.charArray[pos.line].splice(pos.ch, 0, char)
 		//console.log(this.charArray[pos.line])
 	}
@@ -78,11 +88,25 @@ class CRDT {
 				return [] 
 			} else {
 				const lineLen = this.charArray[currentPos.line].length
-				return this.charArray[currentPos.line-1][lineLen]
+				return this.charArray[currentPos.line-1][lineLen].position
 			}
 		}
-		return this.charArray[currentPos.line][currentPos.ch-1]
+		return this.charArray[currentPos.line][currentPos.ch-1].position
+	}
 
+	generatePosBetween(prevPos, nextPos, level=0) {
+		var base = this.base * 2
+		var prevId = prevPos.identifiers || new Identifier(0, this.siteId)
+		var nextId = nextPos.identifiers || new Identifier(base, this.siteId)
+		var strategy = this.randomStrategyGenerator(level)
+		if (nextId.digit - prevId.digit > 1) {
+			this.generateDigitIdBetween(prevPos.id, nextPos.id)
+			return []
+		}
+
+	}
+
+	generateDigitIdBetween(prevId, nextId, strategy) {
 
 	}
 
@@ -94,11 +118,23 @@ class CRDT {
 		console.log("chars on line ", numCharsOnLine)
 		// last line, shoould it be last char?
 		if (currentPos.line === numLines - 1 && currentPos.ch === numCharsOnLine - 1) { 
-			console.log("last")
+			//console.log("last")
 			return []
 		} else { // if n
-			return this.charArray[currentPos.line][currentPos.ch]
+			return this.charArray[currentPos.line][currentPos.ch].position
 		}
+	}
+
+	randomStrategyGenerator(level) {
+		console.log(this.levelStrategy)
+		/*if (this.levelStrategy.length > level && this.levelStrategy[level]) {
+			return this.levelStrategy[level]
+		}*/
+		
+		if (Math.random() >= 0.5) {
+			return "+"
+		} 
+		return "-"
 	}
 
 	insertToText() {
