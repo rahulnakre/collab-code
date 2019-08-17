@@ -1,7 +1,7 @@
 class Char {
-	constructor(value, siteID, position, identifiers) {
+	constructor(value, siteId, position, identifiers) {
 		this.value = value
-		this.siteID = siteID
+		this.siteId = siteId
 		this.position = position,
 		this.identifiers = identifiers  
 	}

@@ -2,37 +2,20 @@
 const Identifier = require("./Identifier").Identifier
 const Char = require("./Char").Char
 //import Identifier from ".Identifier"
-// temp - until i fix the unexpected identifier bug
-/*class Char {
-	constructor(value, siteID, position, digit=null) {
-		this.value = value
-		this.siteID = siteID
-		this.position = position 
-		this.digit = digit
-	}
-
-	compare(char1, char2) {
-		if char1.psoiti
-	}
-
-	createIdentifier(digit, siteID) {
-		const obj = { digit, siteID }
-	}
-}*/
 
 class CRDT {
-	constructor(siteID) {
+	constructor(siteId) {
 		/* args: siteID is a unique identifier for each site
 		*/
-		this.base = 32
-		this.siteID = siteID
+		this.base = 64
+		this.siteId = siteId
 		this.charArray = []
 		this.currLine = -1
 		this.levelStrategy = []
-		this.strategy = "plus"
+		//this.strategy = "plus"
 		this.boundary = 5
 		// the 2 special chars that start and end the document
-		this.firstCharId = new Identifier(0, siteID)
+		this.firstCharId = new Identifier(0, siteId)
 		this.lastCharId = new Identifier()
 		//this.text = ""
 	}
@@ -100,14 +83,33 @@ class CRDT {
 		var nextId = nextPos.identifiers || new Identifier(base, this.siteId)
 		var strategy = this.randomStrategyGenerator(level)
 		if (nextId.digit - prevId.digit > 1) {
-			this.generateDigitIdBetween(prevPos.id, nextPos.id)
+			this.generateDigitIdBetween(prevPos.id, nextPos.id, strategy)
 			return []
+		}
+
+		if (prevId.digit === nextId.digit) {
+			if(prevId.siteId === nextId.siteId) {
+				// generate id between the 2
+			} else {
+				// generate id from prevId + some boundary right
+			}
 		}
 
 	}
 
 	generateDigitIdBetween(prevId, nextId, strategy) {
+		if(nextId - prevId < 1) { // not enough identifiers to insert between
 
+		}
+
+		if (strategy === "+") {
+		 	prevId += 1
+		 	nextId -= this.boundary
+		} else {
+
+		}
+
+		return Math.floor(Math.random() * (nextId - prevId) + prevId)
 	}
 
 	findNextPos(currentPos) {
