@@ -109,7 +109,8 @@ class App extends React.Component {
 	componentDidUpdate() { 
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
-		console.log(this.editorWrapper)
+		console.log(this.state.invalidRoomMsg)
+		// console.log(this.editorWrapper)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
@@ -156,6 +157,7 @@ class App extends React.Component {
 		event.preventDefault()
 
 		console.log("submit")
+		console.log(this.state.roomId)
 		if (this.state.roomToJoin === "") {
 			this.setState({
 				invalidRoomMsg: true
@@ -166,7 +168,13 @@ class App extends React.Component {
 				invalidRoomMsg: true
 			})
 			return
+		} else if (this.state.roomToJoin === this.state.roomId) {
+			this.setState({
+				invalidRoomMsg: true
+			})
+			return
 		}
+
 
 		axios.get(`http://localhost:4001/validate-new-room/${this.state.roomToJoin}`)
 		.then( res => {
@@ -176,16 +184,24 @@ class App extends React.Component {
 				})
 				return
 			}
+			this.setState({
+				invalidRoomMsg: false
+			})
+
+			this.state.socket.emit(SWITCH_ROOM, {
+				currentRoom: this.state.roomId,
+				nextRoom: this.state.roomToJoin
+			})
 		})
 
-		this.setState({
+		/*this.setState({
 			invalidRoomMsg: false
 		})
 
 		this.state.socket.emit(SWITCH_ROOM, {
 			currentRoom: this.state.roomId,
 			nextRoom: this.state.roomToJoin
-		})
+		})*/
 	}
 
 	handleFormChange = (event) => {
