@@ -5,6 +5,7 @@ import AppComponent from "./AppComponent"
 import axios from "axios";
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import Editor from "./Editor"
+import socketCases from "./Functions/socketCases";
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -41,6 +42,7 @@ class App extends React.Component {
 
 
 	componentDidMount() {
+		socketCases.socketCases()
 		const socket = socketIOClient(this.state.endpoint)
 		this.setState({
 			socket: socket
