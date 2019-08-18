@@ -4,8 +4,10 @@ import socketIOClient from "socket.io-client";
 import AppComponent from "./AppComponent"
 import axios from "axios";
 import { Controlled as CodeMirror } from 'react-codemirror2';
-import Editor from "./Editor"
-import socketCases from "./Functions/socketCases";
+import Editor from "./Editor/Editor";
+import { connect } from "react-redux";
+import { changeEditorConfig } from "./store/actions/editorActions";
+// import socketCases from "./Functions/socketCases";
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -22,7 +24,6 @@ const UPDATE_TEXTMODEL = "update-textmodel";
 
 
 class App extends React.Component {
-
 	constructor(props) {
 		super(props)
 		this.editorWrapper = null
@@ -42,7 +43,7 @@ class App extends React.Component {
 
 
 	componentDidMount() {
-		socketCases.socketCases()
+		// socketCases.socketCases()
 		const socket = socketIOClient(this.state.endpoint)
 		this.setState({
 			socket: socket
@@ -152,7 +153,7 @@ class App extends React.Component {
 
 	getEditor = editor => {
 		this.editorWrapper = new Editor(editor)
-
+		//editor.setSize(500, 300)
 	}
 	
 	handleFormSubmit = (event) => {
@@ -222,9 +223,10 @@ class App extends React.Component {
 		const codeMirrorConfig = {
 			theme: "material",
 			lineNumbers: true,
-			lineWrapping: true
+			lineWrapping: true,
+			//theme: "idea"
 		}
-		
+		this.props.changeEditorConfig(codeMirrorConfig)
 		return(
 			<div>
 				<AppComponent 
@@ -245,4 +247,12 @@ class App extends React.Component {
 	}
 }
 
-export default App;
+const mapDispatchToProps = (dispatch) => {
+	return {
+		changeEditorConfig: (config) => {
+			dispatch(changeEditorConfig(config))
+		}
+	}
+}
+
+export default connect(null, mapDispatchToProps)(App);
