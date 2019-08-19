@@ -43,6 +43,14 @@ class CRDT {
 		//this.insertToText()
 	}
 
+	remoteInsert(char) {
+		const pos = findRemoteInsertPos(char)
+	}
+
+	findRemoteInsertPos(char) {
+		//
+	}
+
 	insertToCharArray(char, pos) {
 		if(this.currLine !== pos.line) {
 			console.log("new line")
@@ -77,14 +85,20 @@ class CRDT {
 		return this.charArray[currentPos.line][currentPos.ch-1].position
 	}
 
-	generatePosBetween(prevPos, nextPos, level=0) {
+	generatePosBetween(prevPos, nextPos, level=0, newPos=[]) {
 		var base = this.base * 2
 		var prevId = prevPos.identifiers || new Identifier(0, this.siteId)
 		var nextId = nextPos.identifiers || new Identifier(base, this.siteId)
 		var strategy = this.randomStrategyGenerator(level)
-		if (nextId.digit - prevId.digit > 1) {
+		
+		if (nextId.digit - prevId.digit > 1) { // there's space for an id at this level
 			this.generateDigitIdBetween(prevPos.id, nextPos.id, strategy)
 			return []
+		}
+
+		if (nextId.digit - prevId.digit === 1) { // new level has to be made
+			newPos.push(prevPos)
+			return this.generatePosBetween(prevPos)
 		}
 
 		if (prevId.digit === nextId.digit) {
@@ -98,15 +112,16 @@ class CRDT {
 	}
 
 	generateDigitIdBetween(prevId, nextId, strategy) {
-		if(nextId - prevId < 1) { // not enough identifiers to insert between
-
+		if(nextId - prevId < this.boundary) { 
+			prevId += 1
 		}
 
-		if (strategy === "+") {
+		if (strategy === "+") { // closer to prevId
 		 	prevId += 1
 		 	nextId -= this.boundary
-		} else {
-
+		} else { // closer to nextId
+			prevId += 1
+			nextId = prevId + this.boundary
 		}
 
 		return Math.floor(Math.random() * (nextId - prevId) + prevId)
