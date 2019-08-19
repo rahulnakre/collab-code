@@ -1,22 +1,19 @@
 import React from "react";
 import { Controlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
-//import 'codemirror/theme/idea.css';
-import 'codemirror/mode/htmlmixed/htmlmixed';
-import 'codemirror/mode/css/css';
-import 'codemirror/mode/javascript/javascript';
-import EditorComponent from "./Editor/EditorComponent"
+import EditorComponent from "./Editor/EditorComponent";
+import Navbar from "./Navigation/Navbar";
+import "./App.css"
 
 function AppComponent(props) {
 	//console.log(props)
-
 	return(
-		<div className="App">
-				{props.roomId ? <h1>{props.roomId}</h1> : <h1>hello</h1>}
+		<div>
+				<Navbar />
+				<div className="App">
+					{props.roomId ? <h1>{props.roomId}</h1> : <h1>hello</h1>}
+				</div>
 				<EditorComponent 
 					textModel={props.textModel}
-					codeMirrorConfig={props.codeMirrorConfig}
 					handleBeforeTextModelChange={props.handleBeforeTextModelChange}
 					handleTextModelChange={props.handleTextModelChange}
 					getEditor={props.getEditor}

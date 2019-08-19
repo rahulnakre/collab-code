@@ -1,5 +1,5 @@
 import React from 'react';
-import './App.css';
+//import './App.css';
 import socketIOClient from "socket.io-client";
 import AppComponent from "./AppComponent"
 import axios from "axios";
@@ -112,7 +112,7 @@ class App extends React.Component {
 	componentDidUpdate() { 
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
-		console.log(this.state.invalidRoomMsg)
+		//console.log(this.state.invalidRoomMsg)
 		// console.log(this.editorWrapper)
 	}
 
@@ -121,7 +121,7 @@ class App extends React.Component {
 		this.setState({
 			textModel: value 
 		})
-		console.log(!this.state.receivedFromPeer)
+		//console.log(!this.state.receivedFromPeer)
 		// we only want to emit if this client typed or pasted something
 		if (!this.state.receivedFromPeer) {
 			this.state.socket.emit(SENT_FROM_CLIENT, 
@@ -153,7 +153,7 @@ class App extends React.Component {
 
 	getEditor = editor => {
 		this.editorWrapper = new Editor(editor)
-		//editor.setSize(500, 300)
+		editor.setSize(1000, 500)
 	}
 	
 	handleFormSubmit = (event) => {
@@ -231,7 +231,6 @@ class App extends React.Component {
 			<div>
 				<AppComponent 
 					roomId={this.state.roomId}
-					codeMirrorConfig={codeMirrorConfig}
 					textModel={this.state.textModel}
 					handleBeforeTextModelChange={this.handleBeforeTextModelChange}
 					handleTextModelChange={this.handleTextModelChange}

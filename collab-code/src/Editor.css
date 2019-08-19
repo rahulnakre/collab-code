@@ -1,0 +1,13 @@
+.centered {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.border {
+	border-radius: 15px 50px;
+	color: #FFFFFF;
+	border-collapse: separate;
+	box-shadow: 10px 10px;
+}
