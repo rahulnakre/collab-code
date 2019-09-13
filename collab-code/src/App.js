@@ -17,6 +17,7 @@ const SWITCH_ROOM = "switch-room"
 const GET_TEXTMODEL_FROM_CLIENT = "get-textmodel-from-client";
 const TRANSFER_TEXTMODEL = "transfer-textmodel";
 const UPDATE_TEXTMODEL = "update-textmodel";
+
 //const NEW_ROOM_INFO_FROM_SERVER = "new-room-info-from-server"
 
 
@@ -25,6 +26,7 @@ class App extends React.Component {
 	constructor(props) {
 		super(props)
 		this.editorWrapper = null
+		this.marker = null
 	}
 
 	state = {
@@ -63,7 +65,7 @@ class App extends React.Component {
 			/* server is asking this randomly chosen client in the room to send over
 			its textmodel to the user that just joined the room
 			*/
-			console.log("gimmie text")
+			//console.log("gimmie text")
 			socket.emit(TRANSFER_TEXTMODEL, {textModel: this.state.textModel, newClient: data.newClient})
 		})
 		socket.on(UPDATE_TEXTMODEL, data => {
@@ -72,6 +74,23 @@ class App extends React.Component {
 			})
 		})
 		socket.on(PEER_MESSAGE, data => { // when peer sends a message
+			if (data.type === "cursor") {
+				if (this.marker !== null) this.marker.clear()
+				//console.log("yuh")
+				// creds to yohei seki
+				const cursorCoords = this.editorWrapper.codemirrorInstance.cursorCoords(data.cursorPos);
+				const cursorElement = document.createElement('span');
+				cursorElement.style.borderLeftStyle = 'solid';
+				cursorElement.style.borderLeftWidth = '1px';
+				cursorElement.style.borderLeftColor = '#ff0000';
+				cursorElement.style.height = `${(cursorCoords.bottom - cursorCoords.top)}px`;
+				cursorElement.style.padding = 0;
+				cursorElement.style.zIndex = 0;
+
+				this.marker = this.editorWrapper.codemirrorInstance.setBookmark(data.cursorPos, { widget: cursorElement });
+				return
+			}
+
 			// we got peer's recently typed text and its abs pos
 			// so let's place that change locally
 			// TODO: upgrade from naive abs pos way to crdt
@@ -90,7 +109,6 @@ class App extends React.Component {
 		socket.on(SERVER_BROADCASTS, data => {
 			console.log(data)
 		});
-
 		socket.on("big-announcement", data => {
 			const max = 9;
 			const min = 0;
@@ -113,15 +131,16 @@ class App extends React.Component {
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
-		console.log(value)
+		//console.log(value)
 		this.setState({
 			textModel: value 
 		})
-		console.log(!this.state.receivedFromPeer)
+		//console.log(!this.state.receivedFromPeer)
 		// we only want to emit if this client typed or pasted something
 		if (!this.state.receivedFromPeer) {
 			this.state.socket.emit(SENT_FROM_CLIENT, 
-				{ 
+				{
+					type: "text", 
 					text: data.text,
 					absPos: editor.getCursor(),
 					from: data.from,
@@ -136,17 +155,6 @@ class App extends React.Component {
 	}
 
 
-/*	mergeWithPeerTextAtAbsPos = (peerText, from, to) => {
-		// The text the peer sent will be added locally at the same absolute position
-		// as the peer.
-		//
-		const fromLine = from.line
-		const fromCh = from.ch
-		const toLine = to.line
-		const toCh = to.ch
-		this.editorWrapper.codemirrorInstance.replaceRange(peerText, {line: fromLine, ch: fromCh}, {line: toLine, ch: toCh})
-	}*/
-
 	getEditor = editor => {
 		this.editorWrapper = new Editor(editor)
 
@@ -155,7 +163,7 @@ class App extends React.Component {
 	handleFormSubmit = (event) => {
 		event.preventDefault()
 
-		console.log("submit")
+		//console.log("submit")
 		if (this.state.roomToJoin === "") {
 			this.setState({
 				invalidRoomMsg: true
@@ -196,6 +204,11 @@ class App extends React.Component {
 
 	}
 
+	handleCursorChange = (editor, data) => {
+		//console.log(editor.getCursor())
+		this.state.socket.emit(SENT_FROM_CLIENT, {type: "cursor", cursorPos: editor.getCursor()})
+	}
+
 	handleDoom = () => {
 		this.state.socket.emit("doom", {room: this.state.roomId})
 	}
@@ -220,6 +233,7 @@ class App extends React.Component {
 					roomToJoin={this.state.roomToJoin}
 					handleFormChange={this.handleFormChange}
 					invalidRoomMsg={this.state.invalidRoomMsg}
+					handleCursorChange={this.handleCursorChange}
 				/>
 				<button onClick={this.handleDoom}>doom</button>
 			</div>

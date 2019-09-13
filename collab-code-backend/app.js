@@ -91,13 +91,13 @@ io.on("connection", socket => {
 	io.sockets.emit(SERVER_BROADCASTS, { description: clients + ' clients connected!'});
 
 	socket.on(SENT_FROM_CLIENT, (data, id) => {
-		console.log(data.text);
+		//console.log(data.text);
 		for (room in socket.rooms) {
 			if (room.length === ROOM_ID_LENGTH) {
 				socket.to(room).emit(PEER_MESSAGE, data);
 			}
 		}
-		console.log(data);
+		//console.log(data);
 	});
 
 	socket.on(TRANSFER_TEXTMODEL, data => {

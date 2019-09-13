@@ -16,6 +16,7 @@ function AppComponent(props) {
 					onBeforeChange={props.handleBeforeTextModelChange}
 					onChange={props.handleTextModelChange}
 					editorDidMount={props.getEditor}
+					onCursor={props.handleCursorChange}
 				/>
 
 			<form onSubmit={props.handleFormSubmit}>
