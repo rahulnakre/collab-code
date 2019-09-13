@@ -92,7 +92,7 @@ class CRDT {
 		var strategy = this.randomStrategyGenerator(level)
 		
 		if (nextId.digit - prevId.digit > 1) { // there's space for an id at this level
-			this.generateDigitIdBetween(prevPos.id, nextPos.id, strategy)
+			this.generateDigitIdBetween(prevPos, [], strategy)
 			return []
 		}
 

@@ -119,6 +119,7 @@ class App extends React.Component {
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
 		console.log(this.editorWrapper)
+		// console.log(getCursor())
 		//console.log(this.state.socket.id)
 	}
 
