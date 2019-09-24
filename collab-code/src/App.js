@@ -5,6 +5,7 @@ import AppComponent from "./AppComponent"
 import axios from "axios";
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import Editor from "./Editor"
+import CRDT from "./user-crdt/crdt"
 // handle functions
 //import handleFormSubmit from "./Functions/handleFunctions";
 
@@ -26,6 +27,7 @@ class App extends React.Component {
 	constructor(props) {
 		super(props)
 		this.editorWrapper = null
+		this.crdt = null	
 	}
 
 	state = {
@@ -43,6 +45,8 @@ class App extends React.Component {
 
 
 	componentDidMount() {
+		
+
 		const socket = socketIOClient(this.state.endpoint)
 		this.setState({
 			socket: socket
@@ -65,10 +69,11 @@ class App extends React.Component {
 			this.setState({
 				siteId: data.siteId
 			})
+
 		})
 		socket.on(GET_TEXTMODEL_FROM_CLIENT, data => {
 			/* server is asking this randomly chosen client in the room to send over
-			its textmodel to the user that just joined the room
+			its textmodel to the user that just joined the room, try a better approach next time
 			*/
 			console.log("gimmie text")
 			socket.emit(TRANSFER_TEXTMODEL, {textModel: this.state.textModel, newClient: data.newClient})
@@ -82,6 +87,9 @@ class App extends React.Component {
 			// we got peer's recently typed text and its abs pos
 			// so let's place that change locally
 			// TODO: upgrade from naive abs pos way to crdt
+
+			// remote insert & delete here
+
 			this.setState({
 				receivedFromPeer: true
 			})
@@ -118,14 +126,20 @@ class App extends React.Component {
 	componentDidUpdate() { 
 		//console.log(this.state)
 		//console.log(this.state.invalidRoomMsg)
-		console.log(this.editorWrapper)
+		//console.log(this.editorWrapper)
 		// console.log(getCursor())
 		//console.log(this.state.socket.id)
+		this.crdt = new CRDT(this.siteID)
+
+		console.log("crdt content")
+		console.log(this.crdt.charArray)
 	}
 
 	handleBeforeTextModelChange = (editor, data, value) => {
-		console.log("before change")
-		console.log(data.text)
+		// could put crdt local insert over here
+		this.crdt.localInsert(data.text, this.siteId, data.origin, data.from, data.to)
+
+		//console.log(data.text)
 		this.setState({
 			textModel: value 
 		})
@@ -148,23 +162,10 @@ class App extends React.Component {
 		})
 	}
 
-
-/*	mergeWithPeerTextAtAbsPos = (peerText, from, to) => {
-		// The text the peer sent will be added locally at the same absolute position
-		// as the peer.
-		//
-		const fromLine = from.line
-		const fromCh = from.ch
-		const toLine = to.line
-		const toCh = to.ch
-		this.editorWrapper.codemirrorInstance.replaceRange(peerText, {line: fromLine, ch: fromCh}, {line: toLine, ch: toCh})
-	}*/
-
 	getEditor = editor => {
 		this.editorWrapper = new Editor(editor)
-
 	}
-	
+
 	handleFormSubmit = (event) => {
 		event.preventDefault()
 
